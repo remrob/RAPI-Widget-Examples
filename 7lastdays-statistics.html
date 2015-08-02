@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>                            
+<html>                            
+<head>
+<style>
+#data{font-weight: bold}
+td,tr{border: 1px solid black}
+</style>
+<script src='//remrob.com/js/rapi2.js'></script>
+<script>
+var pathArray = window.location.pathname.split( '/' );
+var curnr=pathArray[3];
+var dvcArr=[];
+var div,tbl2;
+window.onload=function(){
+	var date = new Date();
+
+	tbl2=document.getElementById("tbl2").getElementsByTagName("tr");
+	for(i = 0; i<8; i++) {
+		date.setDate(date.getDate() - 1);
+        var ymd=date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2);
+ 	    var td = tbl2[0].insertCell();
+    	td.appendChild(document.createTextNode(ymd))
+        
+        var newcell = tbl2[1].insertCell()
+        tbl2[1].getElementsByTagName('td')[i+1].className='counter1-'+ymd;
+        var newcell = tbl2[2].insertCell()
+        tbl2[2].getElementsByTagName('td')[i+1].className='counter2-'+ymd;
+        var newcell = tbl2[3].insertCell()
+        tbl2[3].getElementsByTagName('td')[i+1].className='counter3-'+ymd;
+        var newcell = tbl2[4].insertCell()
+        tbl2[4].getElementsByTagName('td')[i+1].className='counter4-'+ymd;
+	}
+
+
+	dvcArr=[curDevice];
+  rapi.listenOn(dvcArr,function(e){
+  	document.getElementById('onl').innerHTML=e.on?'YES':'NO';
+  });
+  
+   
+  rapi.getObjectsByModel(744,function(data){
+  	var tmp=""; //"<option>-</option>";
+  	data.forEach(function(dvc){
+  		tmp+="<option value='"+dvc.sid+"' "+(dvc.sid==curDevice?' selected="selected" ':'')+">"+dvc.name+"</option>";
+  	})
+  	document.getElementsByTagName("select")[0].innerHTML = tmp;
+  });
+	
+  div=document.getElementById("data");
+  tbl1=document.getElementsByTagName("tr");
+  rapi.listenData(dvcArr,'counter1',function(data){//curDevice
+    //var td = tbl1[0].insertCell();
+    //td.appendChild(document.createTextNode(data.timestamp.substring(0,10)))
+    var cell = document.getElementsByClassName(data.key+'-'+data.timestamp.substring(0,10))[0]
+    if(cell)cell.innerHTML =data.value
+    
+    //var td = tbl1[1].insertCell();
+    //td.appendChild(document.createTextNode(data.value))
+
+	//div.innerHTML = div.innerHTML +JSON.stringify(data)+'<br>';
+  });
+      
+}
+
+</script>
+<style></style>
+</head>                            
+<body>
+
+<div>Model: 744</div>
+Online:<span id='onl'></span><br>
+
+Object:
+<select onchange="exefn(this.value)"></select>
+<script>
+function exefn(val){
+	dvcArr[0]=val;
+    rapi.setHash(val);
+    rapi.updateOn(val);
+}
+</script>
+<br>
+<br>
+Data Zähler 1
+
+<div id="data"></div>
+<table id="tbl2">
+	<tr>
+    	<td>kWh</td>
+    </tr>
+	<tr>
+    	<td>Zähler 1</td>
+    </tr>
+	<tr>
+    	<td>Zähler 2</td>
+    </tr>
+	<tr>
+    	<td>Zähler 3</td>
+    </tr>
+	<tr>
+    	<td>Zähler 4</td>
+    </tr>
+</table>
+</body>
+</html>
