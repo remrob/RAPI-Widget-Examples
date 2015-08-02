@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>                            
+<html>                            
+<head>
+<style>
+#data{font-weight: bold}
+</style>
+<script src='//remrob.com/js/rapi2.js'></script>
+<script>
+var pathArray = window.location.pathname.split( '/' );
+var curnr=pathArray[3];
+var dvcArr=[];
+var div;
+window.onload=function(){
+	dvcArr=[curDevice];
+	console.log("curDevice",curDevice,dvcArr[0],typeof dvcArr);
+  rapi.listenOn(dvcArr,function(e){
+  	document.getElementById('onl').innerHTML=e.on?'YES':'NO';
+  });
+  
+   
+  rapi.getObjectsByModel(744,function(data){
+  	var tmp=""; //"<option>-</option>";
+  	data.forEach(function(dvc){
+  		tmp+="<option value='"+dvc.sid+"' "+(dvc.sid==curDevice?' selected="selected" ':'')+">"+dvc.name+"</option>";
+  	})
+  	document.getElementsByTagName("select")[0].innerHTML = tmp;
+  });
+	
+  div=document.getElementById("data");
+  rapi.listenData(dvcArr,'counter1',function(data){//curDevice
+  	//console.log('data',data);
+    div.innerHTML = div.innerHTML +JSON.stringify(data)+'<br>';
+  });
+
+}</script>
+<style></style>
+</head>                            
+<body>
+
+<div>Model: 744</div>
+Online:<span id='onl'></span><br>
+
+Object:
+<select onchange="exefn(this.value)"></select>
+<script>
+function exefn(val){
+	dvcArr[0]=val;
+    rapi.setHash(val);
+    rapi.updateOn(val);
+}
+</script>
+<br>
+<br>
+Data Zähler 1
+<div id="data"></div>
+
+</body>
+</html>
