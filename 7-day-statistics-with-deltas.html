@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>                            
+<html>                            
+<head>
+<style>
+#data{font-weight: bold}
+td,tr{border: 1px solid black}
+</style>
+<script src='//remrob.com/js/rapi2.js'></script>
+<script>
+var pathArray = window.location.pathname.split( '/' );
+var curnr=pathArray[3];
+var dvcArr=[];
+var div,tbl2;
+window.onload=function(){
+	var date = new Date();
+	tbl2=document.getElementById("tbl2").getElementsByTagName("tr");
+	for(i = 0; i<8; i++) {
+		date.setDate(date.getDate() - 1);
+        //var ymd=date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2);
+        var ymd=date.getFullYear().toString().substr(2,2)+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
+        
+        if(i==7) 	var begYMD = +ymd+1;
+        if(i==0) 	var endYMD = +ymd+1;
+        
+        var td = tbl2[0].insertCell();
+    	td.appendChild(document.createTextNode(ymd))
+        
+        var newcell = tbl2[1].insertCell()
+        tbl2[1].getElementsByTagName('td')[i+1].className='counter1-'+ymd;
+        var newcell = tbl2[2].insertCell()
+        tbl2[2].getElementsByTagName('td')[i+1].className='counter2-'+ymd;
+        var newcell = tbl2[3].insertCell()
+        tbl2[3].getElementsByTagName('td')[i+1].className='counter3-'+ymd;
+        var newcell = tbl2[4].insertCell()
+        tbl2[4].getElementsByTagName('td')[i+1].className='counter4-'+ymd;
+	}
+
+
+	dvcArr=[curDevice];
+  rapi.listenOn(dvcArr,function(e){
+  	document.getElementById('onl').innerHTML=e.on?'YES':'NO';
+  });
+  
+   
+  rapi.getObjectsByModel(744,function(data){
+  	var tmp=""; //"<option>-</option>";
+  	data.forEach(function(dvc){
+  		tmp+="<option value='"+dvc.sid+"' "+(dvc.sid==curDevice?' selected="selected" ':'')+">"+dvc.name+"</option>";
+  	})
+  	document.getElementsByTagName("select")[0].innerHTML = tmp;
+  });
+	
+  div=document.getElementById("data");
+  tbl1=document.getElementsByTagName("tr");
+  console.log(begYMD,endYMD);
+  rapi.listenData(dvcArr,'counter1',{range:{yymmdd:[begYMD,endYMD]}},function(data){//curDevice
+      var cell = document.getElementsByClassName(data.datakey+'-'+data.filters['yymmdd'])[0]
+      if(cell) cell.setAttribute("val", data.value);
+      var beforeDate=returnBeforeDate(data.filters['yymmdd'])
+      var prev=document.getElementsByClassName(data.datakey+'-'+beforeDate)[0]
+      var prevVal=prev.getAttribute("val"); 
+      if(prevVal){
+          console.log('counter2',data.value,'prevVal',prevVal)
+          cell.innerHTML = data.value-prevVal;
+      }else
+          cell.innerHTML = '---'
+ 
+  });
+  rapi.listenData(dvcArr,'counter2',{range:{yymmdd:[begYMD,endYMD]}},function(data){
+      var cell = document.getElementsByClassName(data.datakey+'-'+data.filters['yymmdd'])[0]
+      if(cell) cell.setAttribute("val", data.value);
+      var beforeDate=returnBeforeDate(data.filters['yymmdd'])
+      var prev=document.getElementsByClassName(data.datakey+'-'+beforeDate)[0]
+      var prevVal=prev.getAttribute("val"); 
+      if(prevVal){
+          console.log('counter2',data.value,'prevVal',prevVal)
+          cell.innerHTML = data.value-prevVal;
+      }else
+          cell.innerHTML = '---'
+  })
+  rapi.listenData(dvcArr,'counter3',{range:{yymmdd:[begYMD,endYMD]}},function(data){
+      var cell = document.getElementsByClassName(data.datakey+'-'+data.filters['yymmdd'])[0]
+      if(cell) cell.setAttribute("val", data.value);
+      var beforeDate=returnBeforeDate(data.filters['yymmdd'])
+      var prev=document.getElementsByClassName(data.datakey+'-'+beforeDate)[0]
+      var prevVal=prev.getAttribute("val"); 
+      if(prevVal){
+          console.log('counter2',data.value,'prevVal',prevVal)
+          cell.innerHTML = data.value-prevVal;
+      }else
+          cell.innerHTML = '---'
+  })
+  rapi.listenData(dvcArr,'counter4',{range:{yymmdd:[begYMD,endYMD]}},function(data){
+      var cell = document.getElementsByClassName(data.datakey+'-'+data.filters['yymmdd'])[0]
+      if(cell) cell.setAttribute("val", data.value);
+      var beforeDate=returnBeforeDate(data.filters['yymmdd'])
+      var prev=document.getElementsByClassName(data.datakey+'-'+beforeDate)[0]
+      var prevVal=prev.getAttribute("val"); 
+      if(prevVal){
+          console.log('counter2',data.value,'prevVal',prevVal)
+          cell.innerHTML = data.value-prevVal;
+      }else
+          cell.innerHTML = '---'
+  })
+}
+
+function returnBeforeDate(date){
+	var tmp='20'+date;
+    //console.log('tmp',tmp.substr(0,4)+'-'+tmp.substr(4,2)+'-'+tmp.substr(6,2) )
+    var yesterday = new Date(tmp.substr(0,4)+'-'+tmp.substr(4,2)+'-'+tmp.substr(6,2));
+    yesterday.setDate(yesterday.getDate() - 1);
+    var date=yesterday;
+    var ymd=date.getFullYear().toString().substr(2,2)+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
+    return ymd;
+}
+</script>
+<style></style>
+</head>                            
+<body>
+
+<div>Model: 744</div>
+Online:<span id='onl'></span><br>
+
+Object:
+<select onchange="exefn(this.value)"></select>
+<script>
+function exefn(val){
+	dvcArr[0]=val;
+    rapi.setHash(val);
+    rapi.updateOn(val);
+}
+</script>
+<br>
+<br>
+Data Zähler 1
+
+<div id="data"></div>
+<table id="tbl2">
+	<tr>
+    	<td>kWh</td>
+    </tr>
+	<tr>
+    	<td>Zähler 1</td>
+    </tr>
+	<tr>
+    	<td>Zähler 2</td>
+    </tr>
+	<tr>
+    	<td>Zähler 3</td>
+    </tr>
+	<tr>
+    	<td>Zähler 4</td>
+    </tr>
+</table>
+</body>
+</html>
